@@ -1,0 +1,12 @@
+langchain-community
+langchain_openai
+openai
+faiss-cpu
+chromadb
+fastapi~=0.110.1
+uvicorn
+uvicorn[standard]
+langchain~=0.1.15
+pydantic~=2.6.4
+requests~=2.31.0
+starlette~=0.37.2
