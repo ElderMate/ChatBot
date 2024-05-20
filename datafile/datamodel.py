@@ -84,9 +84,8 @@ def makeMsgData(rawdata):
 
 
 class ProgressModel(BaseModel):
-    id: str
+    filename: str
     question: str
-    scenario: str
 
 
 class endModel(BaseModel):

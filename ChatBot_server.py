@@ -37,14 +37,18 @@ async def process_data(request: PromptStartRequest):
         # 예시: 요청된 데이터를 확인하여 필요한 비즈니스 로직을 수행합니다.
         request_data = request.dict()
         translated_data = translate_keys(request_data, key_mapping)
+        print(translated_data)
 
         #데일리 리포트 생성
-        dailyreport = DailyReport.makedailyreport(translated_data["filename"], translated_data)
+        try :
+            dailyreport = DailyReport.makedailyreport(translated_data["filename"], translated_data)
+        except Exception as e:
+            print(e)
 
         #생성값 반환
         return {
             "response": dailyreport,
-            "next": 1
+            "now": 1
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -54,11 +58,10 @@ async def process_data(request: PromptStartRequest):
 
 @app.post("/reports/progress")
 async def process_data(model: ProgressModel):
-    userid = model.id
+    filename = model.filename
     question = model.question
-    scenario = model.scenario
 
-    return_data = ChatBot.chatbot(scenario, question, userid)
+    return_data = ChatBot.chatbot(question, filename)
 
     return return_data
 

@@ -11,10 +11,7 @@ from langchain.tools.json.tool import JsonSpec
 
 import json
 
-scenario_path = r'datafile/promptdata/scenario.json'
-
 data = {}
-
 
 def chatbot_run(prompt, question):
     # 툴킷 설정
@@ -26,134 +23,93 @@ def chatbot_run(prompt, question):
 
     # llm 설정
     llm = ChatOpenAI(temperature=0.1, model='gpt-4-turbo-2024-04-09')
-    agent = create_json_agent(llm=llm, toolkit=toolkit, max_iterations=1000, prefix=prefix, verbose=True, handle_parsing_errors=True)
+    agent = create_json_agent(llm=llm, toolkit=toolkit, max_iterations=1000, prefix=prefix, verbose=True,
+                              handle_parsing_errors=True)
     return agent.run(question)
 
-def chatbot_select_scenario(now_scenario, question):
-    prefix = ("I'll give you the current scenario num information and the user's question. "
-             + "first, Find the information of the current scenario in scenario data, "
-             + "second, Check the current scenario information and let me know the next option according to the user's question. "
-             + "Just answer the num information. "
-             + "Additionally, The scenario that starts with 3 is the same as 1, so think of it as 1. And if the user's question is trying to end the conversation, you can answer 0. "
-             + "Current Scenario: " + now_scenario +", User's Questions: ")
-    choice = chatbot_run(prefix, question)
-    return choice
 
-
-def chatbot_make_answer(now_scenario, question):
-    prefix = ("You are a Korean chatbot in chat progressing. I will give you the number information of the current scenario and the user's question. Please follow all the instructions : "
-              + "First, Take and use your last answer from data in key = chatlog. Just find data[chatlog][chatN](N is num) biggest N is last chatlog"
-              + "Second, Use the current scenario number to find the scenario information in the data in key = scenario and refer to it. Remember!, this is an example. Please don't use it. "
-              + "Third, using real user msg information from data in key = msg. "
-              + "Finally, please make an answer to the user's question based on your last answer and real user data. "
-              + "Additionally, if the current scenario starts with 3, you just answer that the message is classified as dangerous message. "
-              + "Current Scenario: " + now_scenario +", User's Questions: ")
+def chatbot_make_answer(question):
+    prefix = ("너는 노인을 위한 금융 상담사야. 질문에 대해서 적절한 답변을 한국어로 만들어줘."
+              + " 그리고 노인이 모르는 금융 내역이 있다면 그 메시지의 id 정보를 함께 알려줘"
+              + " 내가 처리할 수 있게 json 형태의 답변으로 해줘. 형태는 'answer' : '답변', 'problem' : 'messageId' 이것만 답변해줘."
+              + " problem은 null로 해주다가, 노인이 모른다고 대답하면 그 때 적어줘"
+              + " 추가적으로 노인이 상담을 종료하는 말을 한다면 answer에 '0'을 넣어서 답변해줘"
+              + " 노인의 질문: ")
     answer = chatbot_run(prefix, question)
     return answer
 
-def chatbot_check_message() :
-    prefix = (""
-              + "Check the all chat logs and pick out the SMS that the user questions did not know "
-              + "And, answer picked SMSs in json structure with two keys (id, reason). "
-              + "key id is messageId in user SMS data, "
-              + "and key reason is why pick out the sms that the user said he did not know. ")
-    answer = chatbot_run(prefix, '')
-    return answer
 
+def chatbot(question, filename):
+    # JSON 데이터 불러 오기 (메시지 정보 불러오기)
+    msg_path = r'datafile/msgdata/' + filename + r'.json'
+    log_path = r'datafile/logdata/' + filename + r'.json'
 
-def add_chat_log(question, answer):
-    global data
-
-    num = len(data['chatlog'])
-
-    chat = {
-        "question": question,
-        "answer": answer
-    }
-
-    data['chatlog']['chat' + str(num)] = chat
-
-def save_chat_log(chat_path):
-
-    with open(chat_path, 'w', encoding='utf-8') as file:
-        json.dump(data['chatlog'], file, ensure_ascii=False, indent=4)
-
-
-
-def chatbot(now_scenario, question, userid):
-    # JSON 데이터 불러 오기
-    msg_path = r'datafile/msgdata/' + userid + r'.json'
-    chat_path = r'datafile/chatdata/' + userid + r'.json'
-    global data
-    data = makedata(msg_path, scenario_path, chat_path)
-
-    # 다음 시나리오와 답변 생성
-    next_scenario = chatbot_select_scenario(now_scenario, question)
-
-    #시나리오 종료시
-    if next_scenario == '0':
-        answer = "감사합니다! 오늘도 좋은 하루 되세요!"
-        msg_problem = chatbot_check_message()
-
-
-        with open('test.json', 'w', encoding='utf-8') as file:
-            json.dump(json.loads(msg_problem), file, ensure_ascii=False, indent=4)
-
-        return_data = {
-            "userid": userid,
-            "scenario": "0",
-            "answer": answer
-        }
-        return return_data
-
-
-    #시나리오 계속 진행
-    else :
-        answer = chatbot_make_answer(next_scenario, question)
-
-        # 챗 로그 기록
-        add_chat_log(question, answer)
-        save_chat_log(chat_path)
-
-        # json 형태로 조립
-        return_data = {
-            "userid": userid,
-            "scenario": next_scenario,
-            "answer": answer
-        }
-
-        #유저한테 응답 보내기
-        return return_data
-
-
-def makedata(msg_path, scen_path, chat_path):
-    # 문자 파일 가져오기
     with open(msg_path, 'r', encoding='utf-8') as f1:
         msg_data = json.load(f1)
         f1.close()
 
-    # 시나리오 파일 가져오기
-    with open(scen_path, 'r', encoding='utf-8') as f2:
-        scenario_data = json.load(f2)
-        f2.close()
+    global data
+    data = msg_data
 
-    # Chat 로그 불러오기
-    try:
-        f2 = open(chat_path, 'r', encoding='utf-8')
-    except FileNotFoundError:
-        chat_data = {}
+
+    # 다음 시나리오와 답변 생성
+    chat_answer = chatbot_make_answer(question)
+    json_data = json.loads(chat_answer)
+
+    answer = json_data['answer']
+    problem_id = json_data['problem']
+
+
+    # 시나리오 종료시 서버로 종료 요청
+    if answer == '0':
+
+        #데이터 생성
+        with open(log_path, 'r', encoding='utf-8') as f1:
+            log_data = json.load(f1)
+            f1.close()
+
+        request_data = {
+            "filename": filename,
+            "problems": log_data
+        }
+
+        #서버로 종료 요청 전송
+        print(request_data)
+
+        #App으로 끝 반환
+        return_data = {
+            "answer": "0"
+        }
+
+        return return_data
+
+    # 시나리오 계속 진행
     else:
-        chat_data = json.load(f2)
+        #문제 발생 시 기록
+        if problem_id != "null":
+            save_log_data(log_path, problem_id, "")
+
+        #대답 반환
+        return_data = {
+            "answer": answer
+        }
+        return return_data
+
+def save_log_data(log_path, msg_id, reason):
+    try:
+        f2 = open(log_path, 'r', encoding='utf-8')
+    except FileNotFoundError:
+        log_data = {}
+    else:
+        log_data = json.load(f2)
         f2.close()
 
-    # 두 파일 합치기
-    make_data = {
-        "msg": msg_data,
-        "scenario": scenario_data,
-        "chatlog": chat_data
+    num = len(data)
+    chat_problem = {
+        "messageId": msg_id,
+        "reason": reason
     }
-    return make_data
+    log_data['problem' + str(num)] = chat_problem
 
-
-
-
+    with open(log_path, 'w', encoding='utf-8') as file:
+        json.dump(log_data, file, ensure_ascii=False, indent=4)

@@ -32,9 +32,7 @@ def makedailyreport(userid, msg_data):
 
     #데일리 리포트 생성
     answer = makereport_run(prompt, msg_path)
-    
-    #첫번 째 대화기록 생성
-    sava_first_log(userid, answer)
+
 
     return answer
 
@@ -54,16 +52,3 @@ def makereport_run(prompt, msg_path):
     agent = create_json_agent(llm=llm, toolkit=toolkit, max_iterations=3000, max_execution_time=3000, verbose=True)
     return agent.run(prompt)
 
-
-def sava_first_log(userid, report):
-    chat_path = r'datafile/chatdata/' + userid + r'.json'
-
-    data = {
-        "chat0": {
-            "question": '오늘 금융 문자 요약',
-            "answer": report
-        }
-    }
-
-    with open(chat_path, 'w', encoding='utf-8') as file:
-        json.dump(data, file, ensure_ascii=False, indent=4)
