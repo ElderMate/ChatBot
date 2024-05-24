@@ -10,6 +10,7 @@ from langchain_community.agent_toolkits import JsonToolkit
 from langchain.tools.json.tool import JsonSpec
 
 import json
+import requests
 
 data = {}
 
@@ -30,9 +31,9 @@ def chatbot_run(prompt, question):
 
 def chatbot_make_answer(question):
     prefix = ("너는 노인을 위한 금융 상담사야. 질문에 대해서 적절한 답변을 한국어로 만들어줘."
-              + " 그리고 노인이 모르는 금융 내역이 있다면 그 메시지의 id 정보를 함께 알려줘"
               + " 내가 처리할 수 있게 json 형태의 답변으로 해줘. 형태는 'answer' : '답변', 'problem' : 'messageId' 이것만 답변해줘."
-              + " problem은 null로 해주다가, 노인이 모른다고 대답하면 그 때 적어줘"
+              + " 대답 내용에 한글 말고 다른 기호는 다 빼줘"
+              + " problem은 null로 해주다가, 노인이 모른다고 대답하면 그 때 해당하는 문자의 messageID를 적어줘"
               + " 추가적으로 노인이 상담을 종료하는 말을 한다면 answer에 '0'을 넣어서 답변해줘"
               + " 노인의 질문: ")
     answer = chatbot_run(prefix, question)
@@ -75,6 +76,8 @@ def chatbot(question, filename):
 
         #서버로 종료 요청 전송
         print(request_data)
+        #url = "http://127.0.0.1/reports/end"
+        #response = requests.post(url, json=request_data)
 
         #App으로 끝 반환
         return_data = {
@@ -104,7 +107,7 @@ def save_log_data(log_path, msg_id, reason):
         log_data = json.load(f2)
         f2.close()
 
-    num = len(data)
+    num = len(log_data)
     chat_problem = {
         "messageId": msg_id,
         "reason": reason
