@@ -33,6 +33,10 @@ async def process_data(request: PromptStartRequest):
     try:
         # 요청을 받아 처리하는 로직
         # 예시: 요청된 데이터를 확인하여 필요한 비즈니스 로직을 수행합니다.
+        if not os.path.exists(r'datafile/msgdata') :
+            os.makedirs(r'datafile/msgdata')
+        if not os.path.exists(r'datafile/logdata') :
+            os.makedirs(r'datafile/logdata')
         request_data = request.dict()
         translated_data = translate_keys(request_data, key_mapping)
         print(translated_data)
