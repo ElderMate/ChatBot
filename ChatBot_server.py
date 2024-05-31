@@ -49,8 +49,7 @@ async def process_data(request: PromptStartRequest):
 
         #생성값 반환
         return {
-            "response": dailyreport,
-            "now": 1
+            "response": dailyreport
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
