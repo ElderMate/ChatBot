@@ -62,5 +62,5 @@ def makereport_run(prompt, msg_path):
     llm = ChatOpenAI(temperature=0.2, model='gpt-4-turbo-2024-04-09')
     agent = create_json_agent(llm=llm, toolkit=toolkit, max_iterations=3000, max_execution_time=3000, verbose=True)
 
-    return agent.run(prompt)
+    return agent.invoke(prompt)
 
