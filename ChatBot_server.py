@@ -44,6 +44,7 @@ async def process_data(request: PromptStartRequest):
         #데일리 리포트 생성
         try :
             dailyreport = DailyReport.makedailyreport(translated_data["filename"], translated_data)
+            print(dailyreport)
         except Exception as e:
             print(e)
 
