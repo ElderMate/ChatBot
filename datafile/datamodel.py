@@ -61,9 +61,7 @@ class PromptStartRequest(BaseModel):
     cancels: List[Cancel]
     confirms: List[Confirm]
     invoices: List[Invoice]
-    nonPayments: List[NonPayment]
     opens: List[Open]
-    rejects: List[Reject]
 
 
 def makeMsgData(rawdata):
@@ -71,11 +69,9 @@ def makeMsgData(rawdata):
         "id": rawdata["filename"],
         "message": {
             "결제 승인": rawdata["confirms"],
-            "결제 거절": rawdata["rejects"],
             "결제 취소": rawdata["cancels"],
             "계좌 개설": rawdata["opens"],
             "납부 예정": rawdata["invoices"],
-            "미납": rawdata["nonPayments"],
             "자동 이체": rawdata["autoTransfers"]
         }
     }
@@ -84,12 +80,12 @@ def makeMsgData(rawdata):
 
 
 class ProgressModel(BaseModel):
-    filename: str
+    fileName: str
     question: str
 
 
 class endModel(BaseModel):
-    id: str
+    fileName: str
 
 
 class DataModel(BaseModel):

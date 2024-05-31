@@ -15,9 +15,7 @@ key_mapping = {
     "cancels": "결제 취소",
     "confirms": "결제 승인",
     "invoices": "납부 예정",
-    "nonPayments": "미납",
-    "opens": "계좌 개설",
-    "rejects": "결제 거절"
+    "opens": "계좌 개설"
 }
 
 def translate_keys(data, mapping):
@@ -58,18 +56,38 @@ async def process_data(request: PromptStartRequest):
 
 @app.post("/reports/progress")
 async def process_data(model: ProgressModel):
-    filename = model.filename
+
+    filename = model.fileName
     question = model.question
+    print(model)
 
     return_data = ChatBot.chatbot(question, filename)
 
     return return_data
 
 
-@app.post("/endAPI")
+@app.post("/reports/end")
 async def process_data(model: endModel):
 
-    userid = model.id
+    try:
+        userid = model.fileName
+    except Exception as e :
+        print(e)
 
-    os.remove("datafile/chatdata/" + userid + ".json")
-    os.remove("datafile/msgdata/" + userid + ".json")
+    log_path = r'datafile/logdata/' + userid + r'.json'
+    try:
+        f2 = open(log_path, 'r', encoding='utf-8')
+    except FileNotFoundError:
+        log_data = {}
+    else:
+        log_data = json.load(f2)
+        f2.close()
+
+
+    #파일 삭제
+    msg_path = r'datafile/msgdata/' + userid + r'.json'
+    log_path = r'datafile/logdata/' + userid + r'.json'
+    os.remove(msg_path)
+    os.remove(log_path)
+    print(log_data)
+    return log_data

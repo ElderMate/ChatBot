@@ -22,20 +22,24 @@ def chatbot_run(prompt, question):
     # 입력된 프롬프트
     prefix = prompt
 
+
+
     # llm 설정
-    llm = ChatOpenAI(temperature=0.1, model='gpt-4-turbo-2024-04-09')
+    llm = ChatOpenAI(temperature=0, model='gpt-4-turbo-2024-04-09')
     agent = create_json_agent(llm=llm, toolkit=toolkit, max_iterations=1000, prefix=prefix, verbose=True,
                               handle_parsing_errors=True)
     return agent.run(question)
 
 
 def chatbot_make_answer(question):
-    prefix = ("너는 노인을 위한 금융 상담사야. 질문에 대해서 적절한 답변을 한국어로 만들어줘."
-              + " 내가 처리할 수 있게 json 형태의 답변으로 해줘. 형태는 'answer' : '답변', 'problem' : 'messageId' 이것만 답변해줘."
-              + " 대답 내용에 한글 말고 다른 기호는 다 빼줘"
-              + " problem은 null로 해주다가, 노인이 모른다고 대답하면 그 때 해당하는 문자의 messageID를 적어줘"
-              + " 추가적으로 노인이 상담을 종료하는 말을 한다면 answer에 '0'을 넣어서 답변해줘"
-              + " 노인의 질문: ")
+    prefix = """
+    You are a Korean consultant who informs an elderly person about financial incidents based on all financial-related text messages sent to them. If there is a financial incident the elderly person is unaware of, you must identify the text message where the issue occurred and the nature of the problem. Then, respond to the elderly person that we have checked the problem and will help them handle it later.
+
+    Responses must be provided in JSON format to be used in code. The response format is as follows:
+    - If there is no problem: 'answer': 'Response to the elderly person’s statement', 'problem' : 'null'
+    - If there is a problem: 'answer': 'Response to the elderly person’s statement', 'problem': ['messageId', 'issue description']
+    """
+
     answer = chatbot_run(prefix, question)
     return answer
 
@@ -58,61 +62,36 @@ def chatbot(question, filename):
     json_data = json.loads(chat_answer)
 
     answer = json_data['answer']
-    problem_id = json_data['problem']
+    problem = json_data['problem']
 
 
-    # 시나리오 종료시 서버로 종료 요청
-    if answer == '0':
 
-        #데이터 생성
-        with open(log_path, 'r', encoding='utf-8') as f1:
-            log_data = json.load(f1)
-            f1.close()
+    #문제 발생 시 기록
+    if problem != "null":
+        print(str(problem[0])+problem[1])
+        save_log_data(log_path, problem)
 
-        request_data = {
-            "filename": filename,
-            "problems": log_data
-        }
+    #대답 반환
+    return_data = {
+        "answer": answer
+    }
+    return return_data
 
-        #서버로 종료 요청 전송
-        print(request_data)
-        #url = "http://127.0.0.1/reports/end"
-        #response = requests.post(url, json=request_data)
-
-        #App으로 끝 반환
-        return_data = {
-            "answer": "0"
-        }
-
-        return return_data
-
-    # 시나리오 계속 진행
-    else:
-        #문제 발생 시 기록
-        if problem_id != "null":
-            save_log_data(log_path, problem_id, "")
-
-        #대답 반환
-        return_data = {
-            "answer": answer
-        }
-        return return_data
-
-def save_log_data(log_path, msg_id, reason):
+def save_log_data(log_path, problem):
     try:
         f2 = open(log_path, 'r', encoding='utf-8')
     except FileNotFoundError:
-        log_data = {}
+        log_data = {
+            "messageIds": [],
+            "reasons": []
+        }
     else:
         log_data = json.load(f2)
         f2.close()
 
-    num = len(log_data)
-    chat_problem = {
-        "messageId": msg_id,
-        "reason": reason
-    }
-    log_data['problem' + str(num)] = chat_problem
+    log_data["messageIds"].append(problem[0])
+    log_data["reasons"].append(problem[1])
+
 
     with open(log_path, 'w', encoding='utf-8') as file:
         json.dump(log_data, file, ensure_ascii=False, indent=4)
