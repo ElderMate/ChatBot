@@ -12,7 +12,7 @@ import os
 
 keyfile_name = r'Key.txt'
 key_data = open(keyfile_name, 'r', encoding="utf8")
-os.environ["OPENAI_API_KEY"] = key_data.read()
+os.environ["OPENAI_API_KEY"] = key_data.read().strip()
 
 promptfile_path = r'datafile/promptdata/Dailyprompt.txt'
 
