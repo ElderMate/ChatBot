@@ -25,7 +25,7 @@ def chatbot_run(prompt, question):
 
 
     # llm 설정
-    llm = ChatOpenAI(temperature=0, model='gpt-4-turbo-2024-04-09')
+    llm = ChatOpenAI(temperature=0.5, model='gpt-4-turbo-2024-04-09')
     agent = create_json_agent(llm=llm, toolkit=toolkit, max_iterations=1000, prefix=prefix, verbose=True,
                               handle_parsing_errors=True)
     return agent.run(question)
@@ -36,7 +36,7 @@ def chatbot_make_answer(question):
     You are a Korean consultant who informs an elderly person about financial incidents based on all financial-related text messages sent to them. If there is a financial incident the elderly person is unaware of, you must identify the text message where the issue occurred and the nature of the problem. Then, respond to the elderly person that we have checked the problem and will help them handle it later.
 
     Responses must be provided in JSON format to be used in code. The response format is as follows:
-    - If there is no problem: 'answer': 'Response to the elderly person’s statement', 'problem' : 'null'
+    - If there is no problem: 'answer': 'Response to the elderly person’s statement', 'problem' : null
     - If there is a problem: 'answer': 'Response to the elderly person’s statement', 'problem': ['messageId', 'issue description']
     """
 
@@ -67,7 +67,7 @@ def chatbot(question, filename):
 
 
     #문제 발생 시 기록
-    if problem != "null":
+    if problem != null:
         print(str(problem[0])+problem[1])
         save_log_data(log_path, problem)
 
