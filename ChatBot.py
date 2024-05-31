@@ -67,7 +67,7 @@ def chatbot(question, filename):
 
 
     #문제 발생 시 기록
-    if problem != null:
+    if problem is not None:
         print(str(problem[0])+problem[1])
         save_log_data(log_path, problem)
 
