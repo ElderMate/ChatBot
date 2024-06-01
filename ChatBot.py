@@ -33,7 +33,7 @@ def chatbot_run(prompt, question):
 
 def chatbot_make_answer(question):
     prefix = """
-    You are a Korean counselor who conducts financial counseling based on the financial message information of the elderly. Based on the elderly's questions, you can make an answer by referring to the message information. in addition, if the elderly answered that they do not know the text message, you write down the "messageId" and the reason they actually don't know the message. And you can answer like : "문제가 확인되었습니다.".
+    You are a Korean counselor who conducts financial counseling based on the financial message information of the elderly. Based on the elderly's questions, you can make an answer by referring to the message information. in addition, if the elderly answered that they do not know the text message, you write down the "messageId" and the reason they actually don't know the message. And you just answer like : "The problem has been identified".
     
     Responses must be provided in JSON format to be used in code. The response format is as follows:
     - If there is no problem: 'answer': 'Response to the elderly person’s statement', 'problem' : null
