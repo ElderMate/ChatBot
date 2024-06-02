@@ -190,3 +190,37 @@ async def create_item(class_name: str, item: Item):
         return extracted_info
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+class_model = BertForSequenceClassification.from_pretrained('./model/kobert_model')
+class_model.eval()
+
+index_to_label = {
+    0: '납부 예정',
+    1: '결제 승인',
+    2: '자동 이체',
+    3: '결제 취소',
+    4: '계좌 개설'
+}
+
+def get_label_from_index(index):
+    return index_to_label.get(index, "Unknown")
+
+def clean_text(text):
+    text = re.sub(r'https?://\S+', ' ', text)
+    text = re.sub(r'[^\w\s(),-/]', ' ', text)
+    text = text.replace('\n', ' ')
+    return text
+
+class TextItem(BaseModel):
+    text: str
+
+@app.post("/predict/")
+async def predict(item: TextItem):
+    text = clean_text(item.text)
+    inputs = tokenizer(text, return_tensors="pt", padding=True, truncation=True, max_length=300)
+    with torch.no_grad():
+        outputs = class_model(**inputs)
+        predictions = torch.argmax(outputs.logits, dim=1)
+        predicted_index = predictions.numpy()[0]
+    return {"class": get_label_from_index(predicted_index)}
