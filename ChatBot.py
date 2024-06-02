@@ -33,11 +33,12 @@ def chatbot_run(prompt, question):
 
 def chatbot_make_answer(question):
     prefix = """
-    You are a Korean consultant who informs an elderly person about financial incidents based on all financial-related text messages sent to them. If there is a financial incident the elderly person is unaware of, you must identify the text message where the issue occurred and the nature of the problem. Then, respond to the elderly person that we have checked the problem and will help them handle it later.
-
+    You are a Korean counselor who conducts financial counseling based on the financial message information of the elderly. Based on the elderly's questions, you can make an answer by referring to the message information. in addition, if the elderly answered that they do not know the text message, you write down the "messageId" and the reason they actually don't know the message. And you just answer like : "문제가 확인되었습니다.".
+    
     Responses must be provided in JSON format to be used in code. The response format is as follows:
     - If there is no problem: 'answer': 'Response to the elderly person’s statement', 'problem' : null
     - If there is a problem: 'answer': 'Response to the elderly person’s statement', 'problem': ['messageId', 'issue description']
+	elder's qusetion : 
     """
 
     answer = chatbot_run(prefix, question)
