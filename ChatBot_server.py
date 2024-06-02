@@ -217,7 +217,7 @@ def clean_text(text):
 class TextItem(BaseModel):
     text: str
 
-@app.post("/predict/")
+@app.post("/class/")
 async def predict(item: TextItem):
     text = clean_text(item.text)
     inputs = class_tokenizer(text, return_tensors="pt", padding=True, truncation=True, max_length=300)
@@ -225,4 +225,4 @@ async def predict(item: TextItem):
         outputs = class_model(**inputs)
         predictions = torch.argmax(outputs.logits, dim=1)
         predicted_index = predictions.numpy()[0]
-    return {"class": get_label_from_index(predicted_index)}
+    return {"response": get_label_from_index(predicted_index)}
