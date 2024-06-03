@@ -49,7 +49,7 @@ def chatbot(question, filename):
     # JSON 데이터 불러 오기 (메시지 정보 불러오기)
     msg_path = r'datafile/msgdata/' + filename + r'.json'
     log_path = r'datafile/logdata/' + filename + r'.json'
-    chatlog_path = r'datafile/chatlog/' + filename + r'.json'
+    chatlog_path = r'datafile/chatlogdata/' + filename + r'.json'
 
     with open(msg_path, 'r', encoding='utf-8') as f1:
         msg_data = json.load(f1)
