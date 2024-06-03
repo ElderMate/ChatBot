@@ -98,8 +98,10 @@ async def process_data(model: endModel):
     #파일 삭제
     msg_path = r'datafile/msgdata/' + userid + r'.json'
     log_path = r'datafile/logdata/' + userid + r'.json'
+    chatlog_path = r'datafile/chatlogdata/' + userid + r'.json'
     os.remove(msg_path)
     os.remove(log_path)
+    os.remove(chatlog_path)
     print(log_data)
     return log_data
 
