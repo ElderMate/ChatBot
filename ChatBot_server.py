@@ -42,6 +42,8 @@ async def process_data(request: PromptStartRequest):
             os.makedirs(r'datafile/msgdata')
         if not os.path.exists(r'datafile/logdata') :
             os.makedirs(r'datafile/logdata')
+        if not os.path.exists(r'datafile/chatlogdata'):
+            os.makedirs(r'datafile/chatlogdata')
         request_data = request.dict()
         translated_data = translate_keys(request_data, key_mapping)
         print(translated_data)
