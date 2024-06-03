@@ -86,7 +86,7 @@ def chatbot(question, filename):
         "answer": answer
     }
 
-    save_log_data(chatlog_path, question, answer)
+    save_chat_log_data(chatlog_path, question, answer)
 
     return return_data
 
